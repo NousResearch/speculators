@@ -107,6 +107,29 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         hf_path="Aeala/ShareGPT_Vicuna_unfiltered",
         split="train",
     ),
+    "openhermes": DatasetConfig(
+        name="openhermes",
+        hf_path="teknium/OpenHermes-2.5",
+        split="train",
+    ),
+    "nemotron_chat": DatasetConfig(
+        name="nemotron_chat",
+        hf_path="nvidia/Nemotron-Post-Training-Dataset-V2",
+        split="chat",
+        normalize_fn=_normalize_ultrachat,
+    ),
+    "nemotron_code": DatasetConfig(
+        name="nemotron_code",
+        hf_path="nvidia/Nemotron-Post-Training-Dataset-V2",
+        split="code",
+        normalize_fn=_normalize_ultrachat,
+    ),
+    "nemotron_math": DatasetConfig(
+        name="nemotron_math",
+        hf_path="nvidia/Nemotron-Post-Training-Dataset-V2",
+        split="math",
+        normalize_fn=_normalize_ultrachat,
+    ),
     "ultrachat": DatasetConfig(
         name="ultrachat",
         hf_path="HuggingFaceH4/ultrachat_200k",

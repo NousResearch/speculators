@@ -86,7 +86,7 @@ def create_transformer_layer_config(  # noqa: C901
         )
 
     config_class = DRAFT_ARCH_CONFIGS[draft_arch]
-    verifier_config = AutoConfig.from_pretrained(verifier_name_or_path)
+    verifier_config = AutoConfig.from_pretrained(verifier_name_or_path, trust_remote_code=True)
 
     # For multimodal models (Qwen3VL, etc.), extract text_config
     if hasattr(verifier_config, "text_config"):
@@ -138,7 +138,7 @@ def create_transformer_layer_config(  # noqa: C901
         hidden_act=hidden_act,
         max_position_embeddings=verifier_config.max_position_embeddings,
         initializer_range=verifier_config.initializer_range,
-        rms_norm_eps=verifier_config.rms_norm_eps,
+        rms_norm_eps=verifier_config.rms_norm_eps if hasattr(verifier_config, "rms_norm_eps") else verifier_config.layer_norm_eps if hasattr(verifier_config, "layer_norm_eps") else 1e-5,
         head_dim=head_dim,
         tie_word_embeddings=False,
         sliding_window=sliding_window,
@@ -293,7 +293,7 @@ def parse_vocab_mappings(args: argparse.Namespace):
         "None. Using full verifier vocab"
     )
     # When vocab mapping is not provided, use the full verifier vocab
-    verifier_config = AutoConfig.from_pretrained(args.verifier_name_or_path)
+    verifier_config = AutoConfig.from_pretrained(args.verifier_name_or_path, trust_remote_code=True)
     if hasattr(verifier_config, "text_config"):
         verifier_config = verifier_config.text_config
     return None, None, verifier_config.vocab_size
@@ -472,6 +472,7 @@ def main(args: argparse.Namespace):  # noqa: C901
 
     # Get target layer IDs from the model (resolved at model level)
     num_target_layers = len(draft_model.target_layer_ids)
+    print(f"DEBUG: num_target_layers={num_target_layers}, target_layer_ids={draft_model.target_layer_ids}, args.target_layer_ids={args.target_layer_ids}", flush=True)
 
     if args.speculator_type == "mtp":
         args.num_speculative_steps = draft_model.config.num_speculative_steps
