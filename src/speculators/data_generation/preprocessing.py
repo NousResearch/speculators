@@ -790,7 +790,10 @@ def load_and_preprocess_dataset(
         processed_datasets.append(preprocessed_dataset)
 
     combined_dataset = concatenate_datasets(processed_datasets)
-    combined_dataset.shuffle(seed=seed)
+    # PATCH (pr015): shuffle() returns a new dataset — the original code dropped
+    # the result, so multi-dataset blends were silently truncated to the first
+    # dataset by the select() below. Assign it and flatten indices.
+    combined_dataset = combined_dataset.shuffle(seed=seed)
     if max_samples is not None and len(combined_dataset) > max_samples:
         combined_dataset = combined_dataset.select(range(max_samples))
 
